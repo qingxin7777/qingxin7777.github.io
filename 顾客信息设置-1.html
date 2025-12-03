@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>嘉农公司子系统 - 顾客信息设置</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#4080FF',
+                        success: '#00B42A',
+                        danger: '#F53F3F',
+                        warning: '#FF7D00',
+                        info: '#86909C',
+                        light: '#F2F3F5',
+                        dark: '#1D2129',
+                        'gray-100': '#F7F8FA',
+                        'gray-200': '#E5E6EB',
+                        'gray-300': '#C9CDD4',
+                        'gray-400': '#86909C',
+                        'gray-500': '#4E5969',
+                        'gray-600': '#272E3B',
+                        'gray-700': '#1D2129',
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 2px 8px rgba(0, 0, 0, 0.08)',
+                        'card-hover': '0 4px 16px rgba(0, 0, 0, 0.12)',
+                        'dropdown': '0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05)',
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'pulse-soft': 'pulseSoft 2s infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        pulseSoft: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.7' },
+                        }
+                    },
+                    transitionProperty: {
+                        'height': 'height',
+                        'spacing': 'margin, padding',
+                    }
+                },
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .sidebar-item {
+                @apply px-4 py-3 rounded-lg transition-all duration-200 flex items-center gap-3 text-gray-200;
+            }
+            .sidebar-item.active {
+                @apply bg-primary/20 text-white font-medium;
+            }
+            .sidebar-item:not(.active):hover {
+                @apply bg-gray-700/50 text-white;
+            }
+            .btn {
+                @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 text-sm;
+            }
+            .btn-primary {
+                @apply bg-primary text-white hover:bg-primary/90 focus:ring-2 focus:ring-primary/50;
+            }
+            .btn-success {
+                @apply bg-success text-white hover:bg-success/90 focus:ring-2 focus:ring-success/50;
+            }
+            .btn-danger {
+                @apply bg-danger text-white hover:bg-danger/90 focus:ring-2 focus:ring-danger/50;
+            }
+            .btn-warning {
+                @apply bg-warning text-white hover:bg-warning/90 focus:ring-2 focus:ring-warning/50;
+            }
+            .btn-info {
+                @apply bg-info text-white hover:bg-info/90 focus:ring-2 focus:ring-info/50;
+            }
+            .btn-outline {
+                @apply border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-gray-200;
+            }
+            .btn-sm {
+                @apply px-3 py-1.5 text-sm;
+            }
+            .table {
+                @apply w-full border-collapse;
+            }
+            .table th {
+                @apply px-4 py-3 text-center align-middle text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50 border-b border-gray-200;
+            }
+            .table td {
+                @apply px-4 py-3 border-b border-gray-200 text-center align-middle;
+            }
+            .table tr {
+                @apply transition-all duration-200;
+            }
+            .table tr:hover {
+                @apply bg-gray-50;
+            }
+            .modal {
+                @apply fixed inset-0 bg-black/30 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 backdrop-blur-sm;
+            }
+            .modal.active {
+                @apply opacity-100 pointer-events-auto;
+            }
+            .modal-content {
+                @apply bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-95 opacity-0 origin-center;
+            }
+            .modal.active .modal-content {
+                @apply scale-100 opacity-100;
+            }
+            .form-input {
+                @apply block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition duration-150;
+            }
+            .form-select {
+                @apply block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary sm:text-sm rounded-lg transition duration-150;
+            }
+            .form-label {
+                @apply block text-sm font-medium text-gray-700 mb-1;
+            }
+            .form-error {
+                @apply text-danger text-xs mt-1;
+            }
+            .badge {
+                @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+            }
+            .badge-active {
+                @apply bg-success/10 text-success;
+            }
+            .badge-inactive {
+                @apply bg-danger/10 text-danger;
+            }
+            .badge-processing {
+                @apply bg-warning/10 text-warning;
+            }
+            .badge-pending {
+                @apply bg-info/10 text-info;
+            }
+            .card {
+                @apply bg-white rounded-xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover;
+            }
+            .card-header {
+                @apply flex justify-between items-center mb-4 pb-3 border-b border-gray-100;
+            }
+            .card-title {
+                @apply text-lg font-semibold text-gray-800;
+            }
+            .card-subtitle {
+                @apply text-sm text-gray-500;
+            }
+            .progress-bar {
+                @apply h-2 bg-gray-200 rounded-full overflow-hidden;
+            }
+            .progress-value {
+                @apply h-full transition-all duration-700 ease-out;
+            }
+            .shimmer {
+                @apply bg-gray-200 animate-pulse-soft;
+            }
+            .mobile-menu-btn {
+                @apply md:hidden text-gray-700 hover:text-primary p-2 rounded-md focus:outline-none;
+            }
+            
+            .search-container {
+                @apply relative flex-1;
+            }
+            .search-input {
+                @apply w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition duration-150;
+            }
+            .search-icon {
+                @apply absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none;
+            }
+            .search-button {
+                @apply flex items-center whitespace-nowrap;
+            }
+            .file-input-wrapper {
+                @apply relative overflow-hidden inline-block;
+            }
+
+            .file-input-wrapper input[type=file] {
+                @apply absolute inset-0 w-full h-full opacity-0 cursor-pointer;
+            }
+
+            .import-progress {
+                @apply fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl p-6 z-50 w-96;
+            }
+
+            .progress-bar-container {
+                @apply w-full bg-gray-200 rounded-full h-2.5;
+            }
+
+            .progress-bar-fill {
+                @apply bg-blue-600 h-2.5 rounded-full transition-all duration-300;
+            }
+
+        }
+    </style>
+</head>
+
+<body class="font-inter bg-gray-50 min-h-screen flex flex-col">
+
+    <!-- 顶部导航条 -->
+    <header class="bg-gray-500 shadow-sm z-50 w-full fixed top-0 left-0">
+        <div class="flex items-center justify-between px-8 py-4">
+
+            <!-- 系统名称 -->
+            <div class="flex items-center space-x-3">
+                <i class="fa fa-home text-white text-3xl"></i>
+                <h1 class="text-3xl font-bold text-white">嘉农公司信息系统</h1>
+            </div>
+
+            <!-- 移动端菜单按钮 -->
+            <button id="mobileMenuBtn" class="mobile-menu-btn md:hidden" onclick="toggleMobileMenu()">
+                <i class="fa fa-bars text-2xl text-white"></i>
+            </button>
+
+            <!-- 欢迎语和退出按钮 -->
+            <div class="hidden md:flex items-center space-x-8">
+                <div class="flex items-center space-x-3">
+                    <i class="fa fa-user-circle-o text-white text-2xl"></i>
+                    <span class="text-xl text-white font-medium" id="welcomeUser">欢迎，管理员</span>
+                </div>
+                <button id="logoutBtn"
+                    class="flex items-center space-x-2 px-4 py-3 rounded-md text-white hover:text-red-300 transition-colors duration-200 text-lg font-medium"
+                    onclick="showLogoutConfirm()">
+                    <i class="fa fa-sign-out text-xl"></i>
+                    <span>退出系统</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 侧边栏导航 -->
+    <div id="sidebar"
+        class="fixed top-20 left-0 h-[calc(100vh-4rem)] w-64 bg-gray-400 text-white shadow-lg z-30 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+        <div class="h-16 md:hidden flex items-center justify-center border-b border-gray-700">
+            <h2 class="text-xl font-bold">公司子系统</h2>
+        </div>
+        <div class="py-6 px-4">
+            <div class="mb-6 px-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                        <i class="fa fa-cogs text-primary text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="font-medium font-bold ">公司子系统</div>
+                        <div class="text-xs text-white">版本 1.0.0</div>
+                    </div>
+                </div>
+            </div>
+            <ul class="space-y-1">
+                <li>
+                    <span>基础信息设置</span>
+                    <ul>
+                        <li>
+                            <a href="./产品信息设置-1.html" class="sidebar-item ">
+                                <i class="fa fa-cube w-5 text-center"></i>
+                                <span>产品信息设置</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="./物资信息设置-1.html" class="sidebar-item ">
+                                <i class="fa fa-cubes w-5 text-center"></i>
+                                <span>物资信息设置</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="./农户信息设置-1.html" class="sidebar-item ">
+                                <i class="fa fa-user w-5 text-center"></i>
+                                <span>农户信息设置</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="./顾客信息设置-1.html" class="sidebar-item active">
+                                <i class="fa fa-users w-5 text-center"></i>
+                                <span>顾客信息设置</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="./公司机构设置-1.html" class="sidebar-item">
+                                <i class="fa fa-building w-5 text-center"></i>
+                                <span>公司机构设置</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="./系统设置-1.html" class="sidebar-item ">
+                                <i class="fa fa-industry w-5 text-center"></i>
+                                <span>系统设置</span>
+                            </a>
+                        </li>
+
+                    </ul>
+                </li>
+                <li>
+                    <span>公司财务管理</span>
+                    <ul>
+                        <li>
+                            <a href="#" class="sidebar-item ">
+                                <i class="fa fa-industry w-5 text-center"></i>
+                                <span>收款单</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-item ">
+                                <i class="fa fa-industry w-5 text-center"></i>
+                                <span>付款单</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-item ">
+                                <i class="fa fa-industry w-5 text-center"></i>
+                                <span>利润表</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <span>统计分析</span>
+                    <ul>
+                        <li>
+                            <a href="#" class="sidebar-item ">
+                                <i class="fa fa-industry w-5 text-center"></i>
+                                <span>收购情况统计</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-item ">
+                                <i class="fa fa-industry w-5 text-center"></i>
+                                <span>销售情况统计</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-item ">
+                                <i class="fa fa-industry w-5 text-center"></i>
+                                <span>顾客购买情况统计</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <span>其他业务</span>
+                    <ul>
+                        <li>
+                            <a href="./生产计划制定.html" class="sidebar-item " onclick="showModule('productionPlan')">
+                                <i class="fa fa-calendar-check-o w-5 text-center"></i>
+                                <span>生产计划制定</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="./物资出入库.html" class="sidebar-item ">
+                                <i class="fa fa-industry w-5 text-center"></i>
+                                <span>物资出入库</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="./物资盘点.html" class="sidebar-item ">
+                                <i class="fa fa-industry w-5 text-center"></i>
+                                <span>物资盘点</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+            </ul>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
+                    <i class="fa fa-user text-gray-300"></i>
+                </div>
+                <div>
+                    <div class="text-sm font-medium" id="sidebarUser">管理员</div>
+                    <div class="text-xs text-gray-400">系统管理员</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div id="content"
+        class="min-h-screen md:ml-64 pt-24 md:pt-20 pb-10 px-4 md:px-6 lg:px-8 transition-all duration-300">
+        <!-- 顾客信息设置模块 -->
+        <div id="customerInfo" class="module animate-fade-in">
+            <div class="mt-6 mb-8">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-gray-800">顾客信息设置</h2>
+                        <p class="text-gray-500 mt-1">管理公司顾客基础信息</p>
+                    </div>
+                </div>
+
+                <!-- 顶部操作按钮区域 -->
+                <div class="mb-4 flex flex-col md:flex-row md:items-center gap-4 m-1">
+                    <!-- 左侧：搜索框 -->
+                    <div class="flex items-center gap-4">
+                        <div class="relative">
+                            <input type="text" id="searchCustomer" class="form-input pl-3 pr-4 py-2 w-full md:w-64"
+                                placeholder="搜索顾客名称/编号...">
+                        </div>
+                        <button class="btn btn-primary" onclick="searchCustomerData()">
+                            <i class="fa fa-search"></i>
+                            <span>搜索</span>
+                        </button>
+                    </div>
+
+                    <!-- 右侧：操作按钮 -->
+                    <div class="flex items-center gap-2 ml-auto">
+                        <!-- Excel导出按钮 -->
+                        <button class="btn btn-primary" id="exportCustomer-btn" onclick="exportCustomerToExcel()">
+                            <i class="fa fa-file-excel"></i> Excel导出
+                        </button>
+
+                        <!-- 添加按钮 -->
+                        <button class="btn btn-success" onclick="openAddCustomer()">
+                            <i class="fa fa-plus"></i>
+                            <span>添加顾客</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 表单区域 -->
+            <div class="card mb-6 animate-slide-up">
+                <div class="overflow-x-auto">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th class="font-semibold text-gray-700">顾客编号</th>
+                                <th class="font-semibold text-gray-700">顾客名称</th>
+                                <th class="font-semibold text-gray-700">顾客归属地址</th>
+                                <th class="font-semibold text-gray-700">联系电话</th>
+                                <th class="font-semibold text-gray-700">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customerTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑顾客信息模态框 -->
+    <div id="customerInfoModal" class="modal">
+        <div class="modal-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800" id="customerInfoModalTitle">添加顾客信息</h3>
+                    <button class="text-gray-500 hover:text-gray-700" onclick="closeModal('customerInfo')">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form id="customerInfoForm" onsubmit="saveCustomerData(); return false;">
+                    <input type="hidden" id="customerId">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="customerCode" class="form-label">顾客编号</label>
+                            <input type="text" id="customerCode" class="form-input" placeholder="自动生成（如C20240601001）"
+                                readonly>
+                            <div id="customerCodeError" class="form-error"></div>
+                        </div>
+                        <div>
+                            <label for="customerName" class="form-label">顾客名称</label>
+                            <input type="text" id="customerName" class="form-input" placeholder="如：北京超市连锁" required>
+                            <div id="customerNameError" class="form-error"></div>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="customerAddress" class="form-label">顾客归属地址</label>
+                            <input type="text" id="customerAddress" class="form-input" placeholder="如：北京市朝阳区XX街道XX号"
+                                required>
+                            <div id="customerAddressError" class="form-error"></div>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="contactPhone" class="form-label">联系电话</label>
+                            <input type="tel" id="contactPhone" class="form-input" placeholder="如：010-12345678"
+                                required>
+                            <div id="contactPhoneError" class="form-error"></div>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end gap-3">
+                        <button type="button" class="btn btn-outline" onclick="closeModal('customerInfo')">取消</button>
+                        <button type="submit" class="btn btn-success">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content max-w-md">
+            <div class="p-6">
+                <div class="text-center mb-4">
+                    <div
+                        class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-danger/10 text-danger mb-4">
+                        <i class="fa fa-trash text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2" id="deleteModalTitle">确认删除</h3>
+                    <p class="text-gray-600" id="deleteModalMessage">您确定要删除此记录吗？此操作不可撤销。</p>
+                </div>
+                <div class="flex justify-center gap-3">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('delete')">取消</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">确认删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 退出确认模态框 -->
+    <div id="logoutModal" class="modal">
+        <div class="modal-content max-w-md">
+            <div class="p-6">
+                <div class="text-center mb-4">
+                    <div
+                        class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-warning/10 text-warning mb-4">
+                        <i class="fa fa-sign-out text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">确认退出</h3>
+                    <p class="text-gray-600">您确定要退出系统吗？</p>
+                </div>
+                <div class="flex justify-center gap-3">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('logout')">取消</button>
+                    <button type="button" class="btn btn-warning" onclick="logout()">确认退出</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成功提示框 -->
+    <div id="successToast"
+        class="fixed bottom-4 right-4 bg-success text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-500 flex items-center gap-2 z-50">
+        <i class="fa fa-check-circle"></i>
+        <span id="successMessage">操作成功！</span>
+    </div>
+
+    <!-- 错误提示框 -->
+    <div id="errorToast"
+        class="fixed bottom-4 right-4 bg-danger text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-500 flex items-center gap-2 z-50">
+        <i class="fa fa-exclamation-circle"></i>
+        <span id="errorMessage">操作失败！</span>
+    </div>
+
+    <script>
+        // 顾客信息相关变量
+        let customerData = [];
+        let currentCustomerCode = null;
+        let currentModule = 'customerInfo';
+
+        // DOM加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function () {
+            loadCustomerData();
+            addSearchListeners();
+            document.getElementById('excel-customer-file').addEventListener('change', handleCustomerExcelImport);
+        });
+
+        // 切换显示模块
+        function showModule(moduleName) {
+            // 隐藏所有模块
+            document.querySelectorAll('.module').forEach(module => {
+                module.classList.add('hidden');
+            });
+            // 显示目标模块
+            document.getElementById(moduleName).classList.remove('hidden');
+
+            // 更新当前模块
+            currentModule = moduleName;
+
+            // 更新侧边栏选中状态
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelectorAll(`.sidebar-item[onclick="showModule('${moduleName}')"]`).forEach(item => {
+                item.classList.add('active');
+            });
+
+            // 加载对应模块数据
+            if (moduleName === 'customerInfo' && customerData.length === 0) {
+                loadCustomerData();
+            }
+        }
+
+        // 移动端菜单切换
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('-translate-x-full');
+        }
+
+        // 加载顾客信息数据
+        async function loadCustomerData() {
+            try {
+                const response = await fetch('/api/customer');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                customerData = await response.json();
+                renderCustomerTable(customerData);
+
+            } catch (error) {
+                console.error('获取顾客信息数据失败:', error);
+                showErrorToast('获取顾客信息数据失败，请刷新重试');
+            }
+        }
+
+        // 顾客信息搜索功能
+        function searchCustomerData() {
+            const searchTerm = document.getElementById('searchCustomer').value.toLowerCase();
+
+            const filteredData = customerData.filter(item =>
+                item.code.toLowerCase().includes(searchTerm) ||
+                item.name.toLowerCase().includes(searchTerm) ||
+                item.address.toLowerCase().includes(searchTerm) ||
+                item.phone.toLowerCase().includes(searchTerm)
+            );
+            renderCustomerTable(filteredData);
+        }
+
+        // 添加回车键搜索功能
+        function addSearchListeners() {
+            document.getElementById('searchCustomer').addEventListener('keyup', function (event) {
+                if (event.key === 'Enter') {
+                    searchCustomerData();
+                }
+            });
+        }
+
+        // 打开顾客信息添加模态框
+        function openAddCustomer() {
+            currentCustomerCode = null;
+
+            document.getElementById('customerInfoForm').reset();
+            document.getElementById('customerInfoModalTitle').textContent = '添加顾客信息';
+            document.getElementById('customerCode').value = '';
+
+            // 生成顾客编号：C + YYYYMMDD +  三位序号
+            const date = new Date();
+            const dateStr =
+                date.getFullYear().toString() +
+                (date.getMonth() + 1).toString().padStart(2, '0') +
+                date.getDate().toString().padStart(2, '0');
+
+            // 从顾客 code 中解析出当天最大序号
+            let maxSeq = 0;
+
+            customerData.forEach(item => {
+                // 例如 C20240601003
+                if (item.code.startsWith(`C${dateStr}`)) {
+                    const seq = parseInt(item.code.slice(9)); // 最后三位
+                    if (!isNaN(seq)) {
+                        maxSeq = Math.max(maxSeq, seq);
+                    }
+                }
+            });
+
+            const newSeq = (maxSeq + 1).toString().padStart(3, '0');
+            const newCode = `C${dateStr}${newSeq}`;
+
+            document.getElementById('customerCode').value = newCode;
+
+            showModal('customerInfo');
+        }
+
+        // 打开顾客信息编辑模态框
+        function openEditCustomer(code) {
+            currentCustomerCode = code;
+
+            // 使用 code（主键）查找顾客
+            const item = customerData.find(item => item.code === code);
+            if (!item) return;
+
+            document.getElementById('customerInfoModalTitle').textContent = '编辑顾客信息';
+
+            // 主键 code 不允许用户修改
+            document.getElementById('customerCode').value = item.code;
+            document.getElementById('customerCode').readOnly = true;
+
+            document.getElementById('customerName').value = item.name;
+            document.getElementById('customerAddress').value = item.address || '';
+            document.getElementById('contactPhone').value = item.phone || '';
+
+            showModal('customerInfo');
+        }
+
+        // 打开删除确认框 
+        function openDelete(code) {
+            currentCustomerCode = code;
+
+            // 根据 code 查找顾客信息
+            const item = customerData.find(item => item.code === code);
+            if (!item) return;
+
+            document.getElementById('deleteModalMessage').textContent =
+                `您确定要删除顾客 "${item.name}" 吗？`;
+
+            showModal('delete');
+        }
+
+        // 渲染顾客信息表格
+        function renderCustomerTable(data) {
+            const tbody = document.getElementById('customerTable');
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="py-8 text-center text-gray-500">
+                            <div class="flex flex-col items-center">
+                                <i class="fa fa-users text-4xl mb-3 text-gray-300"></i>
+                                <p>暂无顾客信息数据</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = data.map(item => `
+            <tr>
+                <td>${item.code}</td>
+                <td>${item.name}</td>
+                <td>${item.address}</td>
+                <td>${item.phone}</td>
+                <td>
+                    <div class="flex justify-center gap-2">
+                        <button class="btn btn-sm btn-primary" onclick="openEditCustomer('${item.code}')">
+                            <i class="fa fa-pencil"></i> 编辑
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="openDelete('${item.code}')">
+                            <i class="fa fa-trash"></i> 删除
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            `).join('');
+        }
+
+        // 确认删除
+        async function confirmDelete() {
+            if (!currentCustomerCode) return;
+
+            try {
+                const response = await fetch(`/api/customer/${currentCustomerCode}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    const resData = await response.json();
+                    throw new Error(resData.error || '删除失败');
+                }
+
+                // 从前端数组中移除
+                customerData = customerData.filter(item => item.code !== currentCustomerCode);
+                renderCustomerTable(customerData);
+
+                closeModal('delete');
+                showSuccess('删除成功！');
+            } catch (error) {
+                console.error('删除顾客失败:', error);
+                showErrorToast(`删除请求失败: ${error.message}`);
+            }
+        }
+
+
+        // 保存顾客信息数据
+        async function saveCustomerData() {
+            let isValid = true;
+            const code = document.getElementById('customerCode').value;
+            const name = document.getElementById('customerName').value;
+            const address = document.getElementById('customerAddress').value;
+            const phone = document.getElementById('contactPhone').value;
+
+            // 验证字段
+            isValid = validateField('customerName', name, '请输入顾客名称') && isValid;
+            isValid = validateField('customerAddress', address, '请输入顾客归属地址') && isValid;
+            isValid = validateField('contactPhone', phone, '请输入联系电话') && isValid;
+
+            if (!isValid) return;
+
+            const formData = { code, name, address, phone };
+
+            try {
+                if (currentCustomerCode) {
+                    // ========================
+                    // 更新顾客（基于 code）
+                    // ========================
+                    const response = await fetch(`/api/customer/${currentCustomerCode}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+
+                    if (!response.ok) {
+                        const resData = await response.json();
+                        throw new Error(resData.error || '更新失败');
+                    }
+
+                    // 更新前端数组
+                    const index = customerData.findIndex(item => item.code === currentCustomerCode);
+                    if (index !== -1) {
+                        customerData[index] = { ...customerData[index], ...formData };
+                    }
+
+                    showSuccess('更新成功！');
+
+                } else {
+                    // ========================
+                    // 新增顾客
+                    // ========================
+                    const response = await fetch(`/api/customer`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+
+                    if (!response.ok) {
+                        const resData = await response.json();
+                        throw new Error(resData.error || '添加失败');
+                    }
+
+                    // 新增到前端数组
+                    customerData.push(formData);
+                    showSuccess('添加成功！');
+                }
+
+                closeModal('customerInfo');
+                renderCustomerTable(customerData);
+
+            } catch (error) {
+                console.error('保存顾客数据失败:', error);
+                showErrorToast(`保存失败: ${error.message}`);
+            }
+        }
+
+        // 处理Excel导入
+        function handleCustomerExcelImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const allowedTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'application/vnd.ms-excel'];
+
+            if (!allowedTypes.includes(file.type)) {
+                showErrorToast('请上传Excel文件 (.xlsx, .xls)');
+                event.target.value = '';
+                return;
+            }
+
+            showImportProgress();
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    processCustomerImportedData(jsonData);
+                } catch (error) {
+                    console.error('Excel解析错误:', error);
+                    hideImportProgress();
+                    showErrorToast('Excel文件解析失败，请检查文件格式');
+                }
+            };
+
+            reader.onerror = function () {
+                hideImportProgress();
+                showErrorToast('文件读取失败');
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        // 导出Excel
+        function exportCustomerToExcel() {
+            const dataToExport = customerData;
+
+            if (!dataToExport || dataToExport.length === 0) {
+                showErrorToast('没有数据可以导出');
+                return;
+            }
+
+            const exportData = dataToExport.map(item => ({
+                '顾客编号': item.code,
+                '顾客名称': item.name,
+                '顾客归属地址': item.address,
+                '联系电话': item.phone
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "顾客信息数据");
+
+            const filename = `顾客信息数据_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            XLSX.writeFile(wb, filename);
+
+            showSuccess(`成功导出 ${dataToExport.length} 条数据`);
+        }
+
+        // 处理导入的数据
+        function processCustomerImportedData(data) {
+            if (!data || data.length === 0) {
+                hideImportProgress();
+                showErrorToast('Excel文件中没有数据');
+                return;
+            }
+
+            const mappedData = data.map((row, index) => {
+                return {
+                    code: row['顾客编号'] || row['code'] || '',
+                    name: row['顾客名称'] || row['name'] || '',
+                    address: row['顾客归属地址'] || row['address'] || '',
+                    phone: row['联系电话'] || row['phone'] || ''
+                };
+            });
+
+            const validData = mappedData.filter(item => {
+                return item.code && item.name && item.address && item.phone;
+            });
+
+            if (validData.length === 0) {
+                hideImportProgress();
+                showErrorToast('没有有效的数据可以导入');
+                return;
+            }
+
+            // 批量导入顾客信息数据
+            const existingCodes = new Set(customerData.map(item => item.code));
+            let newCount = 0;
+
+            validData.forEach(item => {
+                if (!existingCodes.has(item.code)) {
+                    const newId = customerData.length > 0 ? Math.max(...customerData.map(i => i.id)) + 1 : 1;
+                    customerData.push({ ...item, id: newId });
+                    newCount++;
+                }
+            });
+
+            hideImportProgress();
+
+            if (newCount > 0) {
+                showSuccess(`成功导入 ${newCount} 条顾客信息数据`);
+                renderCustomerTable(customerData);
+            } else {
+                showErrorToast('所有数据已存在，未导入新数据');
+            }
+
+            document.getElementById('excel-customer-file').value = '';
+        }
+
+        // 显示导入进度
+        function showImportProgress() {
+            // 先移除可能存在的进度条
+            const existingProgress = document.getElementById('import-progress');
+            const existingOverlay = document.getElementById('progress-overlay');
+            if (existingProgress) existingProgress.remove();
+            if (existingOverlay) existingOverlay.remove();
+
+            const progressHtml = `
+                <div id="import-progress" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg shadow-lg z-50">
+                    <h3 class="text-lg font-bold mb-4">正在导入数据...</h3>
+                    <div class="progress-bar">
+                        <div id="progress-fill" class="progress-value bg-primary" style="width: 0%"></div>
+                    </div>
+                    <p class="text-center mt-2 text-gray-600">请稍候...</p>
+                </div>
+                <div id="progress-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', progressHtml);
+
+            // 模拟进度更新
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 5;
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    progress = 100;
+                }
+                updateImportProgress(progress);
+            }, 100);
+        }
+
+        // 更新导入进度
+        function updateImportProgress(percent) {
+            const progressFill = document.getElementById('progress-fill');
+            if (progressFill) {
+                progressFill.style.width = percent + '%';
+            }
+        }
+
+        // 隐藏导入进度
+        function hideImportProgress() {
+            const progressElement = document.getElementById('import-progress');
+            const overlayElement = document.getElementById('progress-overlay');
+
+            if (progressElement) progressElement.remove();
+            if (overlayElement) overlayElement.remove();
+        }
+
+        // 验证字段
+        function validateField(fieldId, value, errorMessage) {
+            if (!value || value.toString().trim() === '') {
+                showError(fieldId, errorMessage);
+                return false;
+            }
+            hideError(fieldId);
+            return true;
+        }
+
+        // 显示错误信息
+        function showError(fieldId, message) {
+            const errorElement = document.getElementById(`${fieldId}Error`);
+            const inputElement = document.getElementById(fieldId);
+
+            if (errorElement && inputElement) {
+                errorElement.textContent = message;
+                inputElement.classList.add('border-danger');
+                inputElement.classList.add('focus:ring-danger/30');
+                inputElement.classList.add('focus:border-danger');
+            }
+        }
+
+        // 隐藏错误信息
+        function hideError(fieldId) {
+            const errorElement = document.getElementById(`${fieldId}Error`);
+            const inputElement = document.getElementById(fieldId);
+
+            if (errorElement && inputElement) {
+                errorElement.textContent = '';
+                inputElement.classList.remove('border-danger');
+                inputElement.classList.remove('focus:ring-danger/30');
+                inputElement.classList.remove('focus:border-danger');
+            }
+        }
+
+        // 显示模态框
+        function showModal(module) {
+            document.getElementById(`${module}Modal`).classList.add('active');
+        }
+
+        // 关闭模态框
+        function closeModal(module) {
+            document.getElementById(`${module}Modal`).classList.remove('active');
+        }
+
+        // 显示成功提示
+        function showSuccess(message) {
+            const toast = document.getElementById('successToast');
+            const toastMessage = document.getElementById('successMessage');
+
+            if (toast && toastMessage) {
+                toastMessage.textContent = message;
+                toast.classList.remove('translate-y-20', 'opacity-0');
+                toast.classList.add('translate-y-0', 'opacity-100');
+
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-0', 'opacity-100');
+                    toast.classList.add('translate-y-20', 'opacity-0');
+                }, 3000);
+            }
+        }
+
+        // 显示错误提示
+        function showErrorToast(message) {
+            const toast = document.getElementById('errorToast');
+            const toastMessage = document.getElementById('errorMessage');
+
+            if (toast && toastMessage) {
+                toastMessage.textContent = message;
+                toast.classList.remove('translate-y-20', 'opacity-0');
+                toast.classList.add('translate-y-0', 'opacity-100');
+
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-0', 'opacity-100');
+                    toast.classList.add('translate-y-20', 'opacity-0');
+                }, 3000);
+            }
+        }
+
+        // 显示退出确认
+        function showLogoutConfirm() {
+            showModal('logout');
+        }
+
+        // 退出系统
+        function logout() {
+            showSuccess('已成功退出系统！');
+            setTimeout(() => {
+                closeModal('logout');
+                window.location.href = '/登陆注册.html';
+            }, 1000);
+        }
+    </script>
+
+</body>
+
+</html>

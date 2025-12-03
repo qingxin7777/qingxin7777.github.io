@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>嘉农公司子系统 - 产品信息设置</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#165DFF",
+                        secondary: "#4080FF",
+                        success: "#00B42A",
+                        danger: "#F53F3F",
+                        warning: "#FF7D00",
+                        info: "#86909C",
+                        light: "#F2F3F5",
+                        dark: "#1D2129",
+                        "gray-100": "#F7F8FA",
+                        "gray-200": "#E5E6EB",
+                        "gray-300": "#C9CDD4",
+                        "gray-400": "#86909C",
+                        "gray-500": "#4E5969",
+                        "gray-600": "#272E3B",
+                        "gray-700": "#1D2129",
+                    },
+                    fontFamily: {
+                        inter: ["Inter", "system-ui", "sans-serif"],
+                    },
+                    boxShadow: {
+                        card: "0 2px 8px rgba(0, 0, 0, 0.08)",
+                        "card-hover": "0 4px 16px rgba(0, 0, 0, 0.12)",
+                        dropdown:
+                            "0 6px 16px 0 rgba(0, 0, 0, 0.08), 0 3px 6px -4px rgba(0, 0, 0, 0.12), 0 9px 28px 8px rgba(0, 0, 0, 0.05)",
+                    },
+                    animation: {
+                        "fade-in": "fadeIn 0.3s ease-in-out",
+                        "slide-up": "slideUp 0.3s ease-out",
+                        "pulse-soft": "pulseSoft 2s infinite",
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            "0%": { opacity: "0" },
+                            "100%": { opacity: "1" },
+                        },
+                        slideUp: {
+                            "0%": { transform: "translateY(20px)", opacity: "0" },
+                            "100%": { transform: "translateY(0)", opacity: "1" },
+                        },
+                        pulseSoft: {
+                            "0%, 100%": { opacity: "1" },
+                            "50%": { opacity: "0.7" },
+                        },
+                    },
+                    transitionProperty: {
+                        height: "height",
+                        spacing: "margin, padding",
+                    },
+                },
+            },
+        };
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+        .content-auto {
+          content-visibility: auto;
+        }
+        .sidebar-item {
+          @apply px-4 py-3 rounded-lg transition-all duration-200 flex items-center gap-3 text-gray-200;
+        }
+        .sidebar-item.active {
+          @apply bg-primary/20 text-white font-medium;
+        }
+        .sidebar-item:not(.active):hover {
+          @apply bg-gray-700/50 text-white;
+        }
+        .btn {
+          @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 text-sm;
+        }
+        .btn-primary {
+          @apply bg-primary text-white hover:bg-primary/90 focus:ring-2 focus:ring-primary/50;
+        }
+        .btn-success {
+          @apply bg-success text-white hover:bg-success/90 focus:ring-2 focus:ring-success/50;
+        }
+        .btn-danger {
+          @apply bg-danger text-white hover:bg-danger/90 focus:ring-2 focus:ring-danger/50;
+        }
+        .btn-warning {
+          @apply bg-warning text-white hover:bg-warning/90 focus:ring-2 focus:ring-warning/50;
+        }
+        .btn-info {
+          @apply bg-info text-white hover:bg-info/90 focus:ring-2 focus:ring-info/50;
+        }
+        .btn-outline {
+          @apply border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-gray-200;
+        }
+        .btn-sm {
+          @apply px-3 py-1.5 text-sm;
+        }
+        .table {
+          @apply w-full border-collapse;
+        }
+        .table th {
+          @apply px-4 py-3 text-center align-middle text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50 border-b border-gray-200;
+        }
+        .table td {
+          @apply px-4 py-3 border-b border-gray-200 text-center align-middle;
+        }
+        .table tr {
+          @apply transition-all duration-200;
+        }
+        .table tr:hover {
+          @apply bg-gray-50;
+        }
+        .modal {
+          @apply fixed inset-0 bg-black/30 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 backdrop-blur-sm;
+        }
+        .modal.active {
+          @apply opacity-100 pointer-events-auto;
+        }
+        .modal-content {
+          @apply bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-95 opacity-0 origin-center;
+        }
+        .modal.active .modal-content {
+          @apply scale-100 opacity-100;
+        }
+        .form-input {
+          @apply block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition duration-150;
+        }
+        .form-select {
+          @apply block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary sm:text-sm rounded-lg transition duration-150;
+        }
+        .form-label {
+          @apply block text-sm font-medium text-gray-700 mb-1;
+        }
+        .form-error {
+          @apply text-danger text-xs mt-1;
+        }
+        .badge {
+          @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+        }
+        .badge-active {
+          @apply bg-success/10 text-success;
+        }
+        .badge-inactive {
+          @apply bg-danger/10 text-danger;
+        }
+        .badge-processing {
+          @apply bg-warning/10 text-warning;
+        }
+        .badge-pending {
+          @apply bg-info/10 text-info;
+        }
+        .card {
+          @apply bg-white rounded-xl shadow-card p-6 transition-all duration-300 hover:shadow-card-hover;
+        }
+        .card-header {
+          @apply flex justify-between items-center mb-4 pb-3 border-b border-gray-100;
+        }
+        .card-title {
+          @apply text-lg font-semibold text-gray-800;
+        }
+        .card-subtitle {
+          @apply text-sm text-gray-500;
+        }
+        .progress-bar {
+          @apply h-2 bg-gray-200 rounded-full overflow-hidden;
+        }
+        .progress-value {
+          @apply h-full transition-all duration-700 ease-out;
+        }
+        .shimmer {
+          @apply bg-gray-200 animate-pulse-soft;
+        }
+        .mobile-menu-btn {
+          @apply md:hidden text-gray-700 hover:text-primary p-2 rounded-md focus:outline-none;
+        }
+
+        .search-container {
+          @apply relative flex-1;
+        }
+        .search-input {
+          @apply w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition duration-150;
+        }
+        .search-icon {
+          @apply absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none;
+        }
+        .search-button {
+          @apply flex items-center whitespace-nowrap;
+        }
+        .file-input-wrapper {
+          @apply relative overflow-hidden inline-block;
+        }
+
+        .file-input-wrapper input[type="file"] {
+          @apply absolute inset-0 w-full h-full opacity-0 cursor-pointer;
+        }
+
+        .import-progress {
+          @apply fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl p-6 z-50 w-96;
+        }
+
+        .progress-bar-container {
+          @apply w-full bg-gray-200 rounded-full h-2.5;
+        }
+
+        .progress-bar-fill {
+          @apply bg-blue-600 h-2.5 rounded-full transition-all duration-300;
+        }
+      }
+    </style>
+</head>
+
+<body class="font-inter bg-gray-50 min-h-screen flex flex-col">
+    <!-- 顶部导航条 -->
+    <header class="bg-gray-500 shadow-sm z-50 w-full fixed top-0 left-0">
+        <div class="flex items-center justify-between px-8 py-4">
+            <!-- 系统名称 -->
+            <div class="flex items-center space-x-3">
+                <i class="fa fa-home text-white text-3xl"></i>
+                <h1 class="text-3xl font-bold text-white">嘉农公司信息系统</h1>
+            </div>
+
+            <!-- 移动端菜单按钮 -->
+            <button id="mobileMenuBtn" class="mobile-menu-btn md:hidden" onclick="toggleMobileMenu()">
+                <i class="fa fa-bars text-2xl text-white"></i>
+            </button>
+
+            <!-- 欢迎语和退出按钮 -->
+            <div class="hidden md:flex items-center space-x-8">
+                <div class="flex items-center space-x-3">
+                    <i class="fa fa-user-circle-o text-white text-2xl"></i>
+                    <span class="text-xl text-white font-medium" id="welcomeUser">欢迎，管理员</span>
+                </div>
+                <button id="logoutBtn"
+                    class="flex items-center space-x-2 px-4 py-3 rounded-md text-white hover:text-red-300 transition-colors duration-200 text-lg font-medium"
+                    onclick="showLogoutConfirm()">
+                    <i class="fa fa-sign-out text-xl"></i>
+                    <span>退出系统</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 侧边栏导航 -->
+    <div id="sidebar"
+        class="fixed top-20 left-0 h-[calc(100vh-4rem)] w-64 bg-gray-400 text-white shadow-lg z-30 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+        <div class="h-16 md:hidden flex items-center justify-center border-b border-gray-700">
+            <h2 class="text-xl font-bold">公司子系统</h2>
+        </div>
+        <div class="py-6 px-4">
+            <div class="mb-6 px-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                        <i class="fa fa-cogs text-primary text-xl"></i>
+                    </div>
+                    <div>
+                        <div class="font-medium font-bold">公司子系统</div>
+                        <div class="text-xs text-white">版本 1.0.0</div>
+                    </div>
+                </div>
+            </div>
+            <ul class="space-y-1">
+                <li>
+                    <span>基础信息设置</span>
+                    <ul>
+                        <li>
+                            <a href="./产品信息设置-1.html" class="sidebar-item active">
+                                <i class="fa fa-cube w-5 text-center"></i>
+                                <span>产品信息设置</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="./物资信息设置-1.html" class="sidebar-item">
+                                <i class="fa fa-industry w-5 text-center"></i>
+                                <span>物资信息设置</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="./农户信息设置-1.html" class="sidebar-item">
+                                <i class="fa fa-industry w-5 text-center"></i>
+                                <span>农户信息设置</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="./顾客信息设置-1.html" class="sidebar-item">
+                                <i class="fa fa-industry w-5 text-center"></i>
+                                <span>顾客信息设置</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="./公司机构设置-1.html" class="sidebar-item">
+                                <i class="fa fa-industry w-5 text-center"></i>
+                                <span>公司机构设置</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="./系统设置-1.html" class="sidebar-item">
+                                <i class="fa fa-industry w-5 text-center"></i>
+                                <span>系统设置</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <span>公司财务管理</span>
+                    <ul>
+                        <li>
+                            <a href="#" class="sidebar-item">
+                                <i class="fa fa-industry w-5 text-center"></i>
+                                <span>收款单</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-item">
+                                <i class="fa fa-industry w-5 text-center"></i>
+                                <span>付款单</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-item">
+                                <i class="fa fa-industry w-5 text-center"></i>
+                                <span>利润表</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <span>统计分析</span>
+                    <ul>
+                        <li>
+                            <a href="#" class="sidebar-item">
+                                <i class="fa fa-industry w-5 text-center"></i>
+                                <span>收购情况统计</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-item">
+                                <i class="fa fa-industry w-5 text-center"></i>
+                                <span>销售情况统计</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="sidebar-item">
+                                <i class="fa fa-industry w-5 text-center"></i>
+                                <span>顾客购买情况统计</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <span>其他业务</span>
+                    <ul>
+                        <li>
+                            <a href="./生产计划制定.html" class="sidebar-item" onclick="showModule('productionPlan')">
+                                <i class="fa fa-calendar-check-o w-5 text-center"></i>
+                                <span>生产计划制定</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="./物资出入库.html" class="sidebar-item">
+                                <i class="fa fa-industry w-5 text-center"></i>
+                                <span>物资出入库</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="./物资盘点.html" class="sidebar-item">
+                                <i class="fa fa-industry w-5 text-center"></i>
+                                <span>物资盘点</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-700">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
+                    <i class="fa fa-user text-gray-300"></i>
+                </div>
+                <div>
+                    <div class="text-sm font-medium" id="sidebarUser">管理员</div>
+                    <div class="text-xs text-gray-400">系统管理员</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主内容区 -->
+    <div id="content"
+        class="min-h-screen md:ml-64 pt-24 md:pt-20 pb-10 px-4 md:px-6 lg:px-8 transition-all duration-300">
+        <!-- 产品信息设置模块 -->
+        <div id="productInfo" class="module animate-fade-in">
+            <div class="mt-6 mb-8">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold text-gray-800">
+                            产品信息设置
+                        </h2>
+                        <p class="text-gray-500 mt-1">管理公司产品基础信息</p>
+                    </div>
+                </div>
+
+                <!-- 顶部操作按钮区域 -->
+                <div class="mb-4 flex flex-col md:flex-row md:items-center gap-4 m-1">
+                    <!-- 左侧：搜索框 -->
+                    <div class="flex items-center gap-4">
+                        <div class="relative">
+                            <input type="text" id="searchProduct" class="form-input pl-3 pr-4 py-2 w-full md:w-64"
+                                placeholder="搜索产品名称/编号..." />
+                        </div>
+                        <button class="btn btn-primary" onclick="searchProductData()">
+                            <i class="fa fa-search"></i>
+                            <span>搜索</span>
+                        </button>
+                    </div>
+
+                    <!-- 右侧：操作按钮 -->
+                    <div class="flex items-center gap-2 ml-auto">
+                        <input type="file" id="excel-product-file" accept=".xlsx,.xls" class="hidden"
+                            onchange="handleProductExcelImport(event)" />
+
+                        <!-- Excel导出按钮 -->
+                        <button class="btn btn-primary" id="exportProduct-btn" onclick="exportProductToExcel()">
+                            <i class="fa fa-file-excel"></i> Excel导出
+                        </button>
+
+                        <!-- 添加按钮 -->
+                        <button class="btn btn-success" onclick="openAddProduct()">
+                            <i class="fa fa-plus"></i>
+                            <span>添加产品</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 表单区域 -->
+            <div class="card mb-6 animate-slide-up">
+                <div class="overflow-x-auto">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th class="font-semibold text-gray-700">产品编号</th>
+                                <th class="font-semibold text-gray-700">产品名称</th>
+                                <th class="font-semibold text-gray-700">等级</th>
+                                <th class="font-semibold text-gray-700">产地</th>
+                                <th class="font-semibold text-gray-700">进价(元)</th>
+                                <th class="font-semibold text-gray-700">包装物</th>
+                                <th class="font-semibold text-gray-700">操作时间</th>
+                                <th class="font-semibold text-gray-700">操作人员ID</th>
+                                <th class="font-semibold text-gray-700">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加/编辑产品信息模态框 -->
+    <div id="productInfoModal" class="modal">
+        <div class="modal-content">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800" id="productInfoModalTitle">
+                        添加产品信息
+                    </h3>
+                    <button class="text-gray-500 hover:text-gray-700" onclick="closeModal('productInfo')">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+                <form id="productInfoForm" onsubmit="saveProductData(); return false;">
+                    <input type="hidden" id="productId" />
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="productCode" class="form-label">产品编号</label>
+                            <input type="text" id="productCode" class="form-input" placeholder="自动生成（如P20240601001）"
+                                readonly />
+                            <div id="productCodeError" class="form-error"></div>
+                        </div>
+                        <div>
+                            <label for="productName" class="form-label">产品名称</label>
+                            <input type="text" id="productName" class="form-input" placeholder="如：特级番茄" required />
+                            <div id="productNameError" class="form-error"></div>
+                        </div>
+                        <div>
+                            <label for="productGrade" class="form-label">等级</label>
+                            <select id="productGrade" class="form-select" required>
+                                <option value="">请选择</option>
+                                <option value="特级">特级</option>
+                                <option value="一级">一级</option>
+                                <option value="二级">二级</option>
+                                <option value="三级">三级</option>
+                                <option value="等外">等外</option>
+                            </select>
+                            <div id="productGradeError" class="form-error"></div>
+                        </div>
+                        <div>
+                            <label for="productOrigin" class="form-label">产地</label>
+                            <input type="text" id="productOrigin" class="form-input" placeholder="如：山东寿光" required />
+                            <div id="productOriginError" class="form-error"></div>
+                        </div>
+                        <div>
+                            <label for="productPrice" class="form-label">进价（元）</label>
+                            <input type="number" id="productPrice" class="form-input" placeholder="请输入进价" min="0"
+                                step="0.01" required />
+                            <div id="productPriceError" class="form-error"></div>
+                        </div>
+                        <div>
+                            <label for="productPackage" class="form-label">包装物</label>
+                            <select id="productPackage" class="form-select" required>
+                                <option value="">请选择</option>
+                                <option value="纸箱">纸箱</option>
+                                <option value="塑料筐">塑料筐</option>
+                                <option value="泡沫箱">泡沫箱</option>
+                                <option value="编织袋">编织袋</option>
+                                <option value="真空包装">真空包装</option>
+                                <option value="礼盒">礼盒</option>
+                            </select>
+                            <div id="productPackageError" class="form-error"></div>
+                        </div>
+                        <div>
+                            <label for="operateTime" class="form-label">操作时间</label>
+                            <input type="datetime-local" id="operateTime" class="form-input" required />
+                            <div id="operateTimeError" class="form-error"></div>
+                        </div>
+                        <div>
+                            <label for="operatorId" class="form-label">操作人员ID</label>
+                            <input type="text" id="operatorId" class="form-input" placeholder="如：OP001" required />
+                            <div id="operatorIdError" class="form-error"></div>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end gap-3">
+                        <button type="button" class="btn btn-outline" onclick="closeModal('productInfo')">
+                            取消
+                        </button>
+                        <button type="submit" class="btn btn-success">保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content max-w-md">
+            <div class="p-6">
+                <div class="text-center mb-4">
+                    <div
+                        class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-danger/10 text-danger mb-4">
+                        <i class="fa fa-trash text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2" id="deleteModalTitle">
+                        确认删除
+                    </h3>
+                    <p class="text-gray-600" id="deleteModalMessage">
+                        您确定要删除此记录吗？此操作不可撤销。
+                    </p>
+                </div>
+                <div class="flex justify-center gap-3">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('delete')">
+                        取消
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                        确认删除
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 退出确认模态框 -->
+    <div id="logoutModal" class="modal">
+        <div class="modal-content max-w-md">
+            <div class="p-6">
+                <div class="text-center mb-4">
+                    <div
+                        class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-warning/10 text-warning mb-4">
+                        <i class="fa fa-sign-out text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">确认退出</h3>
+                    <p class="text-gray-600">您确定要退出系统吗？</p>
+                </div>
+                <div class="flex justify-center gap-3">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('logout')">
+                        取消
+                    </button>
+                    <button type="button" class="btn btn-warning" onclick="logout()">
+                        确认退出
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成功提示框 -->
+    <div id="successToast"
+        class="fixed bottom-4 right-4 bg-success text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-500 flex items-center gap-2 z-50">
+        <i class="fa fa-check-circle"></i>
+        <span id="successMessage">操作成功！</span>
+    </div>
+
+    <!-- 错误提示框 -->
+    <div id="errorToast"
+        class="fixed bottom-4 right-4 bg-danger text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-500 flex items-center gap-2 z-50">
+        <i class="fa fa-exclamation-circle"></i>
+        <span id="errorMessage">操作失败！</span>
+    </div>
+
+    <script>
+        // 产品信息相关变量
+        let productData = [];
+        let currentProductId = null;
+        let currentModule = "productInfo";
+
+        // DOM加载完成后初始化
+        document.addEventListener("DOMContentLoaded", function () {
+            loadProductData();
+            addSearchListeners();
+            document
+                .getElementById("excel-product-file")
+                .addEventListener("change", handleProductExcelImport);
+        });
+
+        // 切换显示模块
+        function showModule(moduleName) {
+            // 隐藏所有模块
+            document.querySelectorAll(".module").forEach((module) => {
+                module.classList.add("hidden");
+            });
+            // 显示目标模块
+            document.getElementById(moduleName).classList.remove("hidden");
+
+            // 更新当前模块
+            currentModule = moduleName;
+
+            // 更新侧边栏选中状态
+            document.querySelectorAll(".sidebar-item").forEach((item) => {
+                item.classList.remove("active");
+            });
+            document
+                .querySelectorAll(
+                    `.sidebar-item[onclick="showModule('${moduleName}')"]`
+                )
+                .forEach((item) => {
+                    item.classList.add("active");
+                });
+
+            // 加载对应模块数据
+            if (moduleName === "productInfo" && productData.length === 0) {
+                loadProductData();
+            }
+        }
+
+        // 移动端菜单切换
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById("sidebar");
+            sidebar.classList.toggle("-translate-x-full");
+        }
+
+        // 加载产品信息数据
+        async function loadProductData() {
+            try {
+                const response = await fetch("http://localhost:8888/api/product", {
+                    method: "GET",
+                });
+
+                if (!response.ok) {
+                    throw new Error("服务器返回状态码 " + response.status);
+                }
+
+                // 后端返回的 JSON 数组
+                productData = await response.json();
+
+                // 渲染到页面
+                renderProductTable(productData);
+            } catch (error) {
+                console.error("获取产品信息数据失败:", error);
+                showErrorToast("获取产品信息数据失败，请刷新重试");
+            }
+        }
+
+        // 产品信息搜索功能
+        function searchProductData() {
+            const searchTerm = document
+                .getElementById("searchProduct")
+                .value.toLowerCase();
+
+            const filteredData = productData.filter(
+                (item) =>
+                    item.code.toLowerCase().includes(searchTerm) ||
+                    item.name.toLowerCase().includes(searchTerm) ||
+                    item.grade.toLowerCase().includes(searchTerm) ||
+                    item.origin.toLowerCase().includes(searchTerm)
+            );
+            renderProductTable(filteredData);
+        }
+
+        // 添加回车键搜索功能
+        function addSearchListeners() {
+            document
+                .getElementById("searchProduct")
+                .addEventListener("keyup", function (event) {
+                    if (event.key === "Enter") {
+                        searchProductData();
+                    }
+                });
+        }
+
+        // 打开产品信息添加模态框
+        function openAddProduct() {
+            currentProductId = null;
+            document.getElementById("productInfoForm").reset();
+            document.getElementById("productInfoModalTitle").textContent =
+                "添加产品信息";
+            document.getElementById("productId").value = "";
+
+            // 生成产品编号（P+日期+序号）
+            const date = new Date();
+            const dateStr =
+                date.getFullYear().toString() +
+                (date.getMonth() + 1).toString().padStart(2, "0") +
+                date.getDate().toString().padStart(2, "0");
+            const lastId =
+                productData.length > 0
+                    ? Math.max(...productData.map((item) => item.id))
+                    : 0;
+            const seq = (lastId + 1).toString().padStart(3, "0");
+            document.getElementById("productCode").value = `P${dateStr}${seq}`;
+
+            // 设置默认操作时间和操作人员
+            document.getElementById("operateTime").value = new Date()
+                .toISOString()
+                .slice(0, 16);
+            document.getElementById("operatorId").value = "OP001";
+
+            showModal("productInfo");
+        }
+
+        // 打开产品信息编辑模态框
+        function openEditProduct(code) {
+            currentProductId = code;
+
+            // 用 code 查找对应产品
+            const item = productData.find(item => item.code === code);
+            if (!item) {
+                console.error("找不到要编辑的产品:", code);
+                showErrorToast("无法找到要编辑的产品");
+                return;
+            }
+
+            document.getElementById("productInfoModalTitle").textContent = "编辑产品信息";
+            document.getElementById("productId").value = item.code; // 如果需要隐藏字段，可以用 code
+            document.getElementById("productCode").value = item.code;
+            document.getElementById("productName").value = item.name;
+            document.getElementById("productGrade").value = item.grade;
+            document.getElementById("productOrigin").value = item.origin;
+            document.getElementById("productPrice").value = item.price;
+            document.getElementById("productPackage").value = item.package;
+
+            // 如果 operateTime 是 "YYYY-MM-DD HH:MM:SS"，需要转成 input datetime-local 格式 "YYYY-MM-DDTHH:MM"
+            if (item.operateTime) {
+                const dt = item.operateTime.replace(" ", "T").substring(0, 16);
+                document.getElementById("operateTime").value = dt;
+            } else {
+                document.getElementById("operateTime").value = "";
+            }
+
+            document.getElementById("operatorId").value = item.operatorId || "";
+
+            showModal("productInfo");
+        }
+
+
+        // 打开删除确认框
+        function openDelete(code) {
+            currentProductId = code;
+
+            // 获取产品信息数据
+            const item = productData.find((item) => item.code === code);
+
+            if (item) {
+                document.getElementById(
+                    "deleteModalMessage"
+                ).textContent = `您确定要删除产品 "${item.name}" 吗？`;
+                showModal("delete");
+            } else {
+                console.error("找不到要删除的产品:", code);
+                showErrorToast("无法找到要删除的产品");
+            }
+        }
+
+        // 渲染产品信息表格
+        function renderProductTable(data) {
+            const tbody = document.getElementById("productTable");
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="py-8 text-center text-gray-500">
+                            <div class="flex flex-col items-center">
+                                <i class="fa fa-cube text-4xl mb-3 text-gray-300"></i>
+                                <p>暂无产品信息数据</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = data
+                .map(
+                    (item) => `
+                <tr>
+                    <td>${item.code}</td>
+                    <td>${item.name}</td>
+                    <td>
+                        <span class="badge 
+                            ${item.grade === "特级"
+                            ? "badge-success"
+                            : item.grade === "一级"
+                                ? "badge-primary"
+                                : item.grade === "二级"
+                                    ? "badge-warning"
+                                    : item.grade === "三级"
+                                        ? "badge-info"
+                                        : "badge-inactive"
+                        }">
+                            ${item.grade}
+                        </span>
+                    </td>
+                    <td>${item.origin}</td>
+                    <td>¥${item.price.toFixed(2)}</td>
+                    <td>${item.package}</td>
+                    <td>${formatDateTime(item.operateTime)}</td>
+                    <td>${item.operatorId}</td>
+                    <td>
+                        <div class="flex justify-center gap-2">
+                            <button class="btn btn-sm btn-primary" onclick="openEditProduct('${item.code}')">
+                                <i class="fa fa-pencil"></i> 编辑
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="openDelete('${item.code}')">
+                                <i class="fa fa-trash"></i> 删除
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `
+                )
+                .join("");
+        }
+
+        // 确认删除
+        async function confirmDelete() {
+            if (!currentProductId) return;
+
+            try {
+                const response = await fetch(
+                    `http://localhost:8888/api/product/${currentProductId}`,
+                    {
+                        method: "DELETE",
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error("删除失败，状态码：" + response.status);
+                }
+
+                // 后端删除成功后，从前端数组移除对应项
+                productData = productData.filter(
+                    (item) => item.code !== currentProductId
+                );
+
+                renderProductTable(productData);
+
+                closeModal("delete");
+                showSuccess("删除成功！");
+            } catch (error) {
+                console.error("删除请求失败:", error);
+                showErrorToast("删除请求失败");
+            }
+        }
+
+        // 保存产品信息数据（新增/编辑）
+        async function saveProductData() {
+            let isValid = true;
+            const code = document.getElementById("productCode").value.trim();
+            const name = document.getElementById("productName").value.trim();
+            const grade = document.getElementById("productGrade").value.trim();
+            const origin = document.getElementById("productOrigin").value.trim();
+            const price = document.getElementById("productPrice").value;
+            const packageType = document.getElementById("productPackage").value.trim();
+            const operateTime = document.getElementById("operateTime").value; // YYYY-MM-DDTHH:MM
+            const operatorId = document.getElementById("operatorId").value.trim();
+
+            // 字段验证
+            isValid = validateField("productName", name, "请输入产品名称") && isValid;
+            isValid = validateField("productGrade", grade, "请选择产品等级") && isValid;
+            isValid = validateField("productOrigin", origin, "请输入产地") && isValid;
+            isValid = validateField("productPrice", price, "请输入有效的进价") && isValid;
+            isValid = validateField("productPackage", packageType, "请选择包装物") && isValid;
+            isValid = validateField("operateTime", operateTime, "请选择操作时间") && isValid;
+            isValid = validateField("operatorId", operatorId, "请输入操作人员ID") && isValid;
+
+            if (!isValid) return;
+
+            // 构造提交数据，转换时间格式为 YYYY-MM-DD HH:MM:SS
+            const formData = {
+                code,
+                name,
+                grade,
+                origin,
+                price: parseFloat(price),
+                package: packageType,
+                operateTime: operateTime.replace("T", " ") + ":00",
+                operatorId,
+            };
+
+            try {
+                let response, result;
+
+                if (currentProductId) {
+                    // 编辑：PUT /api/product/<code>
+                    response = await fetch(`http://localhost:8888/api/product/${currentProductId}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(formData),
+                    });
+                } else {
+                    // 新增：POST /api/product
+                    response = await fetch("http://localhost:8888/api/product", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(formData),
+                    });
+                }
+
+                result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || "保存失败");
+                }
+
+                // 更新前端数组
+                if (currentProductId) {
+                    const index = productData.findIndex(item => item.code === currentProductId);
+                    if (index !== -1) productData[index] = { ...productData[index], ...formData };
+                    showSuccess("更新成功！");
+                } else {
+                    productData.push(formData);
+                    showSuccess("添加成功！");
+                }
+
+                closeModal("productInfo");
+                renderProductTable(productData);
+            } catch (error) {
+                console.error("保存产品数据失败:", error);
+                showErrorToast(error.message);
+            }
+        }
+
+        // 导出Excel
+        function exportProductToExcel() {
+            const dataToExport = productData;
+
+            if (!dataToExport || dataToExport.length === 0) {
+                showErrorToast("没有数据可以导出");
+                return;
+            }
+
+            const exportData = dataToExport.map((item) => ({
+                产品编号: item.code,
+                产品名称: item.name,
+                等级: item.grade,
+                产地: item.origin,
+                "进价(元)": item.price,
+                包装物: item.package,
+                操作时间: item.operateTime,
+                操作人员ID: item.operatorId,
+            }));
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "产品信息数据");
+
+            const filename = `产品信息数据_${new Date()
+                .toISOString()
+                .slice(0, 10)}.xlsx`;
+            XLSX.writeFile(wb, filename);
+
+            showSuccess(`成功导出 ${dataToExport.length} 条数据`);
+        }
+
+        // 处理导入的数据
+        function processProductImportedData(data) {
+            if (!data || data.length === 0) {
+                hideImportProgress();
+                showErrorToast("Excel文件中没有数据");
+                return;
+            }
+
+            const mappedData = data.map((row, index) => {
+                return {
+                    code: row["产品编号"] || row["code"] || "",
+                    name: row["产品名称"] || row["name"] || "",
+                    grade: row["等级"] || row["grade"] || "",
+                    origin: row["产地"] || row["origin"] || "",
+                    price: parseFloat(row["进价(元)"] || row["price"] || 0),
+                    package: row["包装物"] || row["package"] || "",
+                    operateTime: row["操作时间"] || row["operateTime"] || "",
+                    operatorId: row["操作人员ID"] || row["operatorId"] || "",
+                };
+            });
+
+            const validData = mappedData.filter((item) => {
+                return (
+                    item.code &&
+                    item.name &&
+                    item.grade &&
+                    item.origin &&
+                    item.price > 0 &&
+                    item.package &&
+                    item.operateTime &&
+                    item.operatorId
+                );
+            });
+
+            if (validData.length === 0) {
+                hideImportProgress();
+                showErrorToast("没有有效的数据可以导入");
+                return;
+            }
+
+            // 批量导入产品信息数据
+            const existingCodes = new Set(productData.map((item) => item.code));
+            let newCount = 0;
+
+            validData.forEach((item) => {
+                if (!existingCodes.has(item.code)) {
+                    const newId =
+                        productData.length > 0
+                            ? Math.max(...productData.map((i) => i.id)) + 1
+                            : 1;
+                    productData.push({ ...item, id: newId });
+                    newCount++;
+                }
+            });
+
+            hideImportProgress();
+
+            if (newCount > 0) {
+                showSuccess(`成功导入 ${newCount} 条产品信息数据`);
+                renderProductTable(productData);
+                updateProductStatistics();
+            } else {
+                showErrorToast("所有数据已存在，未导入新数据");
+            }
+
+            document.getElementById("excel-product-file").value = "";
+        }
+
+        // 验证字段
+        function validateField(fieldId, value, errorMessage) {
+            if (!value || value.toString().trim() === "") {
+                showError(fieldId, errorMessage);
+                return false;
+            }
+            hideError(fieldId);
+            return true;
+        }
+
+        // 显示错误信息
+        function showError(fieldId, message) {
+            const errorElement = document.getElementById(`${fieldId}Error`);
+            const inputElement = document.getElementById(fieldId);
+
+            if (errorElement && inputElement) {
+                errorElement.textContent = message;
+                inputElement.classList.add("border-danger");
+                inputElement.classList.add("focus:ring-danger/30");
+                inputElement.classList.add("focus:border-danger");
+            }
+        }
+
+        // 隐藏错误信息
+        function hideError(fieldId) {
+            const errorElement = document.getElementById(`${fieldId}Error`);
+            const inputElement = document.getElementById(fieldId);
+
+            if (errorElement && inputElement) {
+                errorElement.textContent = "";
+                inputElement.classList.remove("border-danger");
+                inputElement.classList.remove("focus:ring-danger/30");
+                inputElement.classList.remove("focus:border-danger");
+            }
+        }
+
+        // 格式化日期时间
+        function formatDateTime(dateTimeString) {
+            if (!dateTimeString) return "";
+            const date = new Date(dateTimeString);
+            return `${date.getFullYear()}-${(date.getMonth() + 1)
+                .toString()
+                .padStart(2, "0")}-${date
+                    .getDate()
+                    .toString()
+                    .padStart(2, "0")} ${date
+                        .getHours()
+                        .toString()
+                        .padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
+        }
+
+        // 显示模态框
+        function showModal(module) {
+            document.getElementById(`${module}Modal`).classList.add("active");
+        }
+
+        // 关闭模态框
+        function closeModal(module) {
+            document.getElementById(`${module}Modal`).classList.remove("active");
+        }
+
+        // 显示成功提示
+        function showSuccess(message) {
+            const toast = document.getElementById("successToast");
+            const toastMessage = document.getElementById("successMessage");
+
+            if (toast && toastMessage) {
+                toastMessage.textContent = message;
+                toast.classList.remove("translate-y-20", "opacity-0");
+                toast.classList.add("translate-y-0", "opacity-100");
+
+                setTimeout(() => {
+                    toast.classList.remove("translate-y-0", "opacity-100");
+                    toast.classList.add("translate-y-20", "opacity-0");
+                }, 3000);
+            }
+        }
+
+        // 显示错误提示
+        function showErrorToast(message) {
+            const toast = document.getElementById("errorToast");
+            const toastMessage = document.getElementById("errorMessage");
+
+            if (toast && toastMessage) {
+                toastMessage.textContent = message;
+                toast.classList.remove("translate-y-20", "opacity-0");
+                toast.classList.add("translate-y-0", "opacity-100");
+
+                setTimeout(() => {
+                    toast.classList.remove("translate-y-0", "opacity-100");
+                    toast.classList.add("translate-y-20", "opacity-0");
+                }, 3000);
+            }
+        }
+
+        // 显示退出确认
+        function showLogoutConfirm() {
+            showModal("logout");
+        }
+
+        // 退出系统
+        function logout() {
+            showSuccess("已成功退出系统！");
+            setTimeout(() => {
+                closeModal("logout");
+                window.location.href = "/登陆注册.html";
+            }, 1000);
+        }
+    </script>
+</body>
+
+</html>
