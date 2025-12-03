@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>嘉农公司信息管理系统</title>
+    <!-- 引入图标库（密码显示/隐藏用） -->
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 全局CSS变量 - 统一管理样式 */
+        :root {
+            /* 主题色 */
+            --primary-color: #2d6a4f;
+            --primary-light: #40916c;
+            --primary-dark: #1b4332;
+            --primary-hover: #1f573f;
+            --secondary-color: #95d5b2;
+            --secondary-light: #b7e4c7;
+            /* 中性色 */
+            --white: #ffffff;
+            --gray-50: #f8fdf7;
+            --gray-100: #e8f4f8;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-600: #6c757d;
+            --gray-700: #34495e;
+            /* 功能色 */
+            --error-color: #e53e3e;
+            /* 布局变量 */
+            --container-width: 450px;
+            --form-padding: 45px 40px;
+            --mobile-form-padding: 35px 25px;
+            --border-radius-lg: 20px;
+            --border-radius-md: 12px;
+            --border-radius-sm: 8px;
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.1);
+            /* 动画变量 */
+            --transition-base: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "PingFang SC", "Microsoft Yahei", "Helvetica Neue", sans-serif;
+        }
+
+        body {
+            /* 蔬菜背景图 + 双层遮罩优化视觉 */
+            background: url('https://cdn.pixabay.com/photo/2023/06/12/11/34/mushrooms-8058299_1280.jpg') no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* 双层遮罩：底层深色弱化背景，上层浅色提升表单可读性 */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(45, 106, 79, 0.1);
+            z-index: -2;
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.4);
+            z-index: -1;
+        }
+
+        /* 表单容器 - 视觉升级 */
+        .form-container {
+            width: var(--container-width);
+            max-width: 100%;
+            background: linear-gradient(180deg, var(--white) 0%, var(--gray-50) 100%);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            border: 1px solid var(--gray-100);
+            transition: var(--transition-base);
+        }
+
+        .form-container:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* 表单盒子 - 布局重构 */
+        .form-box {
+            padding: var(--form-padding);
+            display: none;
+        }
+
+        .form-box.active {
+            display: block;
+            animation: fadeIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* 淡入动画优化 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 表单标题 - 视觉强化 */
+        .form-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .form-title {
+            color: var(--primary-color);
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .form-subtitle {
+            color: var(--gray-600);
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 1.5;
+        }
+
+        /* 表单分组 - 间距优化 */
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        /* 标签样式升级 */
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--gray-700);
+            font-size: 14px;
+            font-weight: 500;
+            transition: var(--transition-fast);
+        }
+
+        /* 输入框容器 - 适配密码显示按钮 */
+        .input-wrapper {
+            position: relative;
+        }
+
+        /* 输入框/选择框 - 样式统一优化 */
+        .form-input {
+            width: 100%;
+            padding: 15px 18px;
+            border: 1px solid var(--gray-100);
+            border-radius: var(--border-radius-md);
+            font-size: 15px;
+            background: var(--white);
+            color: var(--gray-700);
+            transition: var(--transition-fast);
+            outline: none;
+        }
+
+        /* 占位符样式优化 */
+        .form-input::placeholder {
+            color: var(--gray-600);
+            opacity: 0.7;
+            font-size: 14px;
+        }
+
+        /* 输入框交互态 */
+        .form-input:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 4px rgba(116, 198, 157, 0.1);
+            background: var(--white);
+        }
+
+        .form-input:hover {
+            border-color: var(--secondary-light);
+        }
+
+        /* 选择框特殊样式 */
+        .form-input select {
+            appearance: none;
+            background: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 18px center;
+            padding-right: 45px !important;
+        }
+
+        /* 密码显示/隐藏按钮 */
+        .password-toggle {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: var(--gray-600);
+            cursor: pointer;
+            font-size: 18px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-fast);
+        }
+
+        .password-toggle:hover {
+            color: var(--primary-color);
+        }
+
+        /* 错误提示 - 样式升级 */
+        .error-tip {
+            height: 22px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--error-color);
+            line-height: 22px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            opacity: 0;
+            transform: translateY(5px);
+            transition: var(--transition-fast);
+        }
+
+        .error-tip.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .error-tip::before {
+            content: '!';
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            background: var(--error-color);
+            color: var(--white);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 18px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        /* 提交按钮 - 视觉升级 */
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            color: var(--white);
+            border: none;
+            border-radius: var(--border-radius-md);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-base);
+            margin-top: 10px;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 按钮hover/active态 */
+        .submit-btn:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(45, 106, 79, 0.2);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 8px rgba(45, 106, 79, 0.2);
+        }
+
+        /* 按钮点击波纹效果（视觉增强） */
+        .submit-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .submit-btn:active::after {
+            width: 300px;
+            height: 300px;
+            opacity: 0;
+        }
+
+        /* 表单切换区域 - 布局优化 */
+        .form-switch {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: var(--gray-600);
+            padding-top: 15px;
+            border-top: 1px solid var(--gray-100);
+        }
+
+        .form-switch a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition-fast);
+            position: relative;
+        }
+
+        /* 切换链接下划线动画 */
+        .form-switch a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-light);
+            transition: var(--transition-fast);
+        }
+
+        .form-switch a:hover {
+            color: var(--primary-dark);
+        }
+
+        .form-switch a:hover::after {
+            width: 100%;
+        }
+
+        /* 响应式布局优化 - 多断点适配 */
+        @media (max-width: 768px) {
+            :root {
+                --container-width: 400px;
+                --form-padding: 40px 35px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            :root {
+                --container-width: 100%;
+                --form-padding: var(--mobile-form-padding);
+            }
+
+            .form-title {
+                font-size: 24px;
+            }
+
+            .form-group {
+                margin-bottom: 22px;
+            }
+
+            .submit-btn {
+                padding: 15px;
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-container">
+        <!-- 登录表单 -->
+        <div class="form-box login-box active">
+            <div class="form-header">
+                <h2 class="form-title">嘉农公司信息管理系统</h2>
+                <p class="form-subtitle">请选择身份并输入账号密码登录</p>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">登录身份</label>
+                <select class="form-input" id="login-identity">
+                    <option value="总部">总部公司</option>
+                    <option value="批发中心">批发中心</option>
+                    <option value="生产基地">生产基地</option>
+                    <option value="代购点">代购点</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">用户名</label>
+                <div class="input-wrapper">
+                    <input type="text" class="form-input" id="login-username" placeholder="请输入用户名（至少3位）">
+                </div>
+                <div class="error-tip" id="login-username-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">密码</label>
+                <div class="input-wrapper">
+                    <input type="password" class="form-input" id="login-password" placeholder="请输入密码（6-15位，至少两种字符）">
+                    <button type="button" class="password-toggle" id="login-pwd-toggle">
+                        <i class="fas fa-eye-slash"></i>
+                    </button>
+                </div>
+                <div class="error-tip" id="login-password-error"></div>
+            </div>
+
+            <button class="submit-btn" id="login-btn">登录系统</button>
+
+            <div class="form-switch">
+                还没有账号？<a href="javascript:;" id="to-register">立即注册</a>
+            </div>
+        </div>
+
+        <!-- 注册表单 -->
+        <div class="form-box register-box">
+            <div class="form-header">
+                <h2 class="form-title">嘉农公司信息管理系统</h2>
+                <p class="form-subtitle">请选择身份并完成账号注册</p>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">登录身份</label>
+                <select class="form-input" id="register-identity">
+                    <option value="总部">总部公司</option>
+                    <option value="批发中心">批发中心</option>
+                    <option value="生产基地">生产基地</option>
+                    <option value="代购点">代购点</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">用户名</label>
+                <div class="input-wrapper">
+                    <input type="text" class="form-input" id="register-username" placeholder="请设置用户名（至少3位）">
+                </div>
+                <div class="error-tip" id="register-username-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">密码</label>
+                <div class="input-wrapper">
+                    <input type="password" class="form-input" id="register-password" placeholder="请设置密码（6-15位，至少两种字符）">
+                    <button type="button" class="password-toggle" id="register-pwd-toggle">
+                        <i class="fas fa-eye-slash"></i>
+                    </button>
+                </div>
+                <div class="error-tip" id="register-password-error"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">确认密码</label>
+                <div class="input-wrapper">
+                    <input type="password" class="form-input" id="register-repassword" placeholder="请再次输入密码">
+                    <button type="button" class="password-toggle" id="register-repwd-toggle">
+                        <i class="fas fa-eye-slash"></i>
+                    </button>
+                </div>
+                <div class="error-tip" id="register-repassword-error"></div>
+            </div>
+
+            <button class="submit-btn" id="register-btn">完成注册</button>
+
+            <div class="form-switch">
+                已有账号？<a href="javascript:;" id="to-login">返回登录</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM元素获取（统一管理）
+        const dom = {
+            loginBox: document.querySelector('.login-box'),
+            registerBox: document.querySelector('.register-box'),
+            toRegister: document.getElementById('to-register'),
+            toLogin: document.getElementById('to-login'),
+            loginBtn: document.getElementById('login-btn'),
+            registerBtn: document.getElementById('register-btn'),
+            // 密码显示/隐藏按钮
+            loginPwdToggle: document.getElementById('login-pwd-toggle'),
+            registerPwdToggle: document.getElementById('register-pwd-toggle'),
+            registerRepwdToggle: document.getElementById('register-repwd-toggle'),
+            // 表单输入框
+            loginUsername: document.getElementById('login-username'),
+            loginPassword: document.getElementById('login-password'),
+            registerUsername: document.getElementById('register-username'),
+            registerPassword: document.getElementById('register-password'),
+            registerRepassword: document.getElementById('register-repassword'),
+            // 错误提示
+            loginUsernameError: document.getElementById('login-username-error'),
+            loginPasswordError: document.getElementById('login-password-error'),
+            registerUsernameError: document.getElementById('register-username-error'),
+            registerPasswordError: document.getElementById('register-password-error'),
+            registerRepasswordError: document.getElementById('register-repassword-error')
+        };
+
+        // 表单切换逻辑
+        dom.toRegister.addEventListener('click', () => {
+            dom.loginBox.classList.remove('active');
+            dom.registerBox.classList.add('active');
+            clearAllErrors();
+            clearAllInputs(); // 切换时清空输入框
+        });
+
+        dom.toLogin.addEventListener('click', () => {
+            dom.registerBox.classList.remove('active');
+            dom.loginBox.classList.add('active');
+            clearAllErrors();
+            clearAllInputs(); // 切换时清空输入框
+        });
+
+        // 密码显示/隐藏通用函数
+        function togglePassword(btn, input) {
+            const type = input.type === 'password' ? 'text' : 'password';
+            input.type = type;
+            // 切换图标
+            const icon = btn.querySelector('i');
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        }
+
+        // 绑定密码显示/隐藏事件
+        dom.loginPwdToggle.addEventListener('click', () => togglePassword(dom.loginPwdToggle, dom.loginPassword));
+        dom.registerPwdToggle.addEventListener('click', () => togglePassword(dom.registerPwdToggle, dom.registerPassword));
+        dom.registerRepwdToggle.addEventListener('click', () => togglePassword(dom.registerRepwdToggle, dom.registerRepassword));
+
+        // 表单验证通用函数
+        const validator = {
+            // 用户名验证
+            username: (val) => {
+                if (!val.trim()) return { valid: false, msg: '用户名不能为空' };
+                if (val.length < 3) return { valid: false, msg: '用户名长度不能少于3位' };
+                return { valid: true, msg: '' };
+            },
+            // 密码验证
+            password: (val) => {
+                if (val.length < 6 || val.length > 15) return { valid: false, msg: '密码长度必须为6-15位' };
+                const hasNumber = /\d/.test(val);
+                const hasLetter = /[a-zA-Z]/.test(val);
+                const hasSpecial = /[^a-zA-Z0-9]/.test(val);
+                const typeCount = [hasNumber, hasLetter, hasSpecial].filter(Boolean).length;
+                if (typeCount < 2) return { valid: false, msg: '密码必须包含至少两种字符（数字、字母、特殊字符）' };
+                return { valid: true, msg: '' };
+            },
+            // 确认密码验证
+            repassword: (pwd, repwd) => {
+                if (!repwd.trim()) return { valid: false, msg: '确认密码不能为空' };
+                if (pwd !== repwd) return { valid: false, msg: '两次输入的密码不一致' };
+                return { valid: true, msg: '' };
+            }
+        };
+
+        // 显示错误提示
+        function showError(el, msg) {
+            el.textContent = msg;
+            el.classList.add('show');
+        }
+
+        // 隐藏错误提示
+        function hideError(el) {
+            el.textContent = '';
+            el.classList.remove('show');
+        }
+
+        // 清空所有错误提示
+        function clearAllErrors() {
+            Object.values(dom).forEach(el => {
+                if (el && el.classList && el.classList.contains('error-tip')) {
+                    hideError(el);
+                }
+            });
+        }
+
+        // 生成用户唯一 code：USER + yyyyMMdd + 3位序号
+        function generateUserCode() {
+            const date = new Date();
+            const yyyy = date.getFullYear();
+            const MM = String(date.getMonth() + 1).padStart(2, "0");
+            const dd = String(date.getDate()).padStart(2, "0");
+
+            return fetch('/api/getUserCountToday')
+                .then(response => response.json())
+                .then(data => {
+                    const count = data.count + 1;
+                    const index = String(count).padStart(3, "0");
+                    return `USER${yyyy}${MM}${dd}${index}`;
+                });
+        }
+
+        // 清空所有输入框
+        function clearAllInputs() {
+            [dom.loginUsername, dom.loginPassword, dom.registerUsername, dom.registerPassword, dom.registerRepassword].forEach(input => {
+                input.value = '';
+                // 重置密码输入框类型为password
+                if (input.type === 'text' && input.id.includes('password')) {
+                    input.type = 'password';
+                    // 重置图标
+                    const toggleBtn = document.querySelector(`#${input.id.replace('password', 'pwd-toggle').replace('repassword', 'repwd-toggle')}`);
+                    if (toggleBtn) {
+                        const icon = toggleBtn.querySelector('i');
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    }
+                }
+            });
+        }
+
+        // 登录
+        dom.loginBtn.addEventListener('click', () => {
+            const identity = document.getElementById('login-identity').value;
+            const code = dom.loginUsername.value.trim();
+            const password = dom.loginPassword.value.trim();
+            let isValid = true;
+
+            // 验证用户名
+            const usernameRes = validator.username(code);
+            if (!usernameRes.valid) {
+                showError(dom.loginUsernameError, usernameRes.msg);
+                isValid = false;
+            } else {
+                hideError(dom.loginUsernameError);
+            }
+
+            // 验证密码
+            const passwordRes = validator.password(password);
+            if (!passwordRes.valid) {
+                showError(dom.loginPasswordError, passwordRes.msg);
+                isValid = false;
+            } else {
+                hideError(dom.loginPasswordError);
+            }
+
+            if (isValid) {
+                fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        code: code,
+                        password: password,
+                        subsystem: identity
+                    })
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.code === 200) {
+                            alert(`🎉 登录成功！\n身份：${data.data.subsystem}\n用户名：${data.data.name}`);
+
+                            // 根据不同子系统跳转不同页面
+                            if (identity === '生产基地') {
+                                window.location.href = './农户信息设置-1.html'; // 替换为实际页面
+                            } else if (identity === '批发中心') {
+                                window.location.href = './顾客信息设置-1.html'; // 替换为实际页面
+                            } else if (identity === '代购点') {
+                                window.location.href = './公司机构设置-1.html'; // 替换为实际页面
+                            } else if (identity === '总部') {
+                                window.location.href = './产品信息设置-1.html'; // 替换为实际页面
+                            } else {
+                                alert('未知子系统，无法跳转');
+                            }
+                        } else {
+                            alert(data.msg);
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('登录失败，网络错误');
+                    });
+            }
+        });
+
+        //注册
+        dom.registerBtn.addEventListener('click', () => {
+            const identity = document.getElementById('register-identity').value;
+            const username = dom.registerUsername.value.trim();
+            const password = dom.registerPassword.value.trim();
+            const repassword = dom.registerRepassword.value.trim();
+            let isValid = true;
+
+            // 验证用户名
+            const usernameRes = validator.username(username);
+            if (!usernameRes.valid) {
+                showError(dom.registerUsernameError, usernameRes.msg);
+                isValid = false;
+            } else {
+                hideError(dom.registerUsernameError);
+            }
+
+            // 验证密码
+            const passwordRes = validator.password(password);
+            if (!passwordRes.valid) {
+                showError(dom.registerPasswordError, passwordRes.msg);
+                isValid = false;
+            } else {
+                hideError(dom.registerPasswordError);
+            }
+
+            // 验证确认密码
+            const repasswordRes = validator.repassword(password, repassword);
+            if (!repasswordRes.valid) {
+                showError(dom.registerRepasswordError, repasswordRes.msg);
+                isValid = false;
+            } else {
+                hideError(dom.registerRepasswordError);
+            }
+
+            if (isValid) {
+                // 生成唯一 code 并提交注册
+                generateUserCode().then(code => {
+                    fetch('/api/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            code: code,
+                            name: username,
+                            password: password,
+                            subsystem: identity
+                        })
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.code === 200) {
+                                alert(`✅ 注册成功！\n身份：${identity}\n用户名：${username}\n请返回登录`);
+                                // 切换回登录页并清空表单
+                                dom.registerBox.classList.remove('active');
+                                dom.loginBox.classList.add('active');
+                                clearAllInputs();
+                            } else {
+                                alert(`❌ 注册失败：${data.msg}`);
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            alert('注册失败，网络错误');
+                        });
+                });
+            }
+        });
+
+
+        // 实时验证（输入时触发，提升用户体验）
+        dom.loginUsername.addEventListener('input', () => {
+            const res = validator.username(dom.loginUsername.value.trim());
+            if (!res.valid) showError(dom.loginUsernameError, res.msg);
+            else hideError(dom.loginUsernameError);
+        });
+
+        dom.loginPassword.addEventListener('input', () => {
+            const res = validator.password(dom.loginPassword.value.trim());
+            if (!res.valid) showError(dom.loginPasswordError, res.msg);
+            else hideError(dom.loginPasswordError);
+        });
+
+        dom.registerUsername.addEventListener('input', () => {
+            const res = validator.username(dom.registerUsername.value.trim());
+            if (!res.valid) showError(dom.registerUsernameError, res.msg);
+            else hideError(dom.registerUsernameError);
+        });
+
+        dom.registerPassword.addEventListener('input', () => {
+            const res = validator.password(dom.registerPassword.value.trim());
+            if (!res.valid) showError(dom.registerPasswordError, res.msg);
+            else hideError(dom.registerPasswordError);
+        });
+
+        dom.registerRepassword.addEventListener('input', () => {
+            const pwd = dom.registerPassword.value.trim();
+            const repwd = dom.registerRepassword.value.trim();
+            const res = validator.repassword(pwd, repwd);
+            if (!res.valid) showError(dom.registerRepasswordError, res.msg);
+            else hideError(dom.registerRepasswordError);
+        });
+    </script>
+</body>
+
+</html>
